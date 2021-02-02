@@ -1,0 +1,1 @@
+[![Build status](https://ci.appveyor.com/api/projects/status/yp93162t0j749kg2?svg=true)](https://ci.appveyor.com/project/Antonina/order-card-change-of-data)
