@@ -1,7 +1,8 @@
 package ru.netology.test;
 
 import com.codeborne.selenide.Condition;
-import com.codeborne.selenide.SelenideElement;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.Keys;
@@ -16,13 +17,27 @@ import static com.codeborne.selenide.Selectors.withText;
 import static com.codeborne.selenide.Selenide.*;
 import static ru.netology.data.DataGeneratorForCard.getCardInfo;
 
+import io.qameta.allure.selenide.AllureSelenide;
+import com.codeborne.selenide.logevents.SelenideLogger;
+
 public class OrderCardChangeOfDataTest {
     DataGeneratorForCard.CardInfo user = getCardInfo();
 
-    @BeforeEach
-    void setUpAll() {
-        open("http://localhost:9999");
+    @BeforeAll
+    static void setUpAll() {
+        SelenideLogger.addListener("allure", new AllureSelenide());
     }
+
+    @BeforeEach
+    void setUpEach() {
+        open("http://localhost:9999/");
+    }
+
+    @AfterAll
+    static void tearDownAll() {
+        SelenideLogger.removeListener("allure");
+    }
+
 
     @Test
     void shouldSuccessfulDateChange() {
@@ -54,6 +69,32 @@ public class OrderCardChangeOfDataTest {
                 .shouldBe(Condition.visible, Duration.ofMillis(5000));
         $("[data-test-id='success-notification'] > .notification__content")
                 .shouldHave(text("Встреча успешно запланирована на " + user.getRescheduledDate()))
-                .shouldBe(Condition.visible,Duration.ofMillis(5000));
+                .shouldBe(Condition.visible, Duration.ofMillis(5000));
+    }
+
+
+    @Test
+    void shouldWrongPhone() {
+        $("[data-test-id=city] input").setValue(user.getCity());
+        $("[data-test-id=date] input").sendKeys(Keys.CONTROL + "A" + Keys.DELETE);
+        $("[data-test-id=date] input").setValue(user.getDateOfMeeting());
+        $("[data-test-id=name] input").setValue(user.getFullName());
+        $("[data-test-id=phone] input").setValue("787");
+        $("[data-test-id=agreement]").click();
+        $("button.button").click();
+        $("[data-test-id=phone] .input__sub").shouldHave(exactText("Телефон указан неверно. Должно быть 11 цифр, например, +79012345678."));
+    }
+
+    @Test
+    void shouldCorrectFullName() {
+        $("[data-test-id=city] input").setValue(user.getCity());
+        $("[data-test-id=date] input").sendKeys(Keys.CONTROL + "A" + Keys.DELETE);
+        $("[data-test-id=date] input").setValue(user.getDateOfMeeting());
+        $("[data-test-id=name] input").setValue("Алёна");
+        $("[data-test-id=phone] input").setValue(user.getPhone());
+        $("[data-test-id=agreement]").click();
+        $("button.button").click();
+        $("[data-test-id=name] .input__sub").shouldHave(exactText("Успешно!"));
     }
 }
+

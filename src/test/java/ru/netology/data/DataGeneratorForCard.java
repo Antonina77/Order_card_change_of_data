@@ -32,7 +32,5 @@ public class DataGeneratorForCard {
                 LocalDate.now().plusDays(3).format(df),
                 LocalDate.now().plusDays(5).format(df));
     }
-
-
 }
 
